@@ -29,7 +29,7 @@ interface TaskPropertiesProps {
 }
 
 const formatStamp = (date: Date) =>
-  date.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })
+  date.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
 
 /**
  * The XP "Properties" sheet for a task. Viewing and editing are the same

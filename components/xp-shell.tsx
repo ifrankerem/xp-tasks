@@ -49,7 +49,7 @@ function useClock() {
     const id = window.setInterval(() => setNow(new Date()), 15_000)
     return () => window.clearInterval(id)
   }, [])
-  return now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""
+  return now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }) : ""
 }
 
 interface TaskbarProps {
@@ -182,7 +182,7 @@ export function RemindersDialog({
           {missed.map((alarm) => (
             <button key={alarm.id} type="button" className="xp-reminder-row" onClick={() => onOpenTask(alarm)}>
               <span>{alarm.title}</span>
-              <span>{new Date(alarm.fireAt).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+              <span>{new Date(alarm.fireAt).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}</span>
             </button>
           ))}
         </div>
