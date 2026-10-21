@@ -217,7 +217,12 @@ export default function TaskProperties({
             <legend>Alarm</legend>
             <div className="xp-prow is-wide">
               <XpCheckbox checked={alarmEnabled} onChange={edit(setAlarmEnabled)}>Ring at this time</XpCheckbox>
-              <input aria-label="Alarm time" type="time" value={alarmTime} onChange={(event) => edit(setAlarmTime)(event.target.value)} disabled={!alarmEnabled} />
+              {/* The native input opens Android's picker; it sits invisible over our own text because its
+                  displayed value follows the phone locale and can show AM/PM. */}
+              <label className={`xp-time-field${alarmEnabled ? "" : " is-disabled"}`}>
+                <span className="xp-field-input" aria-hidden="true">{alarmTime}</span>
+                <input aria-label="Alarm time" type="time" value={alarmTime} onChange={(event) => edit(setAlarmTime)(event.target.value)} disabled={!alarmEnabled} />
+              </label>
             </div>
           </fieldset>
           <RepeatEditor value={repeatRule} onChange={edit(setRepeatRule)} idPrefix={isNew ? "add-task" : "task-detail"} />
