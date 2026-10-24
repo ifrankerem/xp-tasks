@@ -973,6 +973,7 @@
 .xp-time-field .xp-field-input { display: flex; align-items: center; height: 32px; }
 .xp-time-field.is-disabled .xp-field-input { background: var(--xp-chrome); color: var(--xp-disabled); }
 .xp-app .xp-time-field input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.xp-time-selects { display: inline-flex; align-items: center; gap: 4px; }
 
 .xp-groupbox { border: 1px solid var(--xp-gbox-border); border-radius: 4px; padding: 8px 10px 10px; margin: 0; display: grid; gap: 8px; min-width: 0; }
 .xp-groupbox legend { padding: 0 4px; color: var(--xp-legend); }

@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { Capacitor } from "@capacitor/core"
 import { useState } from "react"
 import type { Task } from "@/lib/task"
 import RepeatEditor from "@/components/repeat-editor"
@@ -27,6 +28,10 @@ interface TaskPropertiesProps {
   onDelete?: () => void
   onClose: () => void
 }
+
+const pad = (value: number) => String(value).padStart(2, "0")
+const HOURS = Array.from({ length: 24 }, (_, hour) => pad(hour))
+const MINUTES = Array.from({ length: 60 }, (_, minute) => pad(minute))
 
 const formatStamp = (date: Date) =>
   date.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
@@ -217,12 +222,25 @@ export default function TaskProperties({
             <legend>Alarm</legend>
             <div className="xp-prow is-wide">
               <XpCheckbox checked={alarmEnabled} onChange={edit(setAlarmEnabled)}>Ring at this time</XpCheckbox>
-              {/* The native input opens Android's picker; it sits invisible over our own text because its
-                  displayed value follows the phone locale and can show AM/PM. */}
-              <label className={`xp-time-field${alarmEnabled ? "" : " is-disabled"}`}>
-                <span className="xp-field-input" aria-hidden="true">{alarmTime}</span>
-                <input aria-label="Alarm time" type="time" value={alarmTime} onChange={(event) => edit(setAlarmTime)(event.target.value)} disabled={!alarmEnabled} />
-              </label>
+              {Capacitor.isNativePlatform() ? (
+                // The native input opens Android's picker; it sits invisible over our own text because its
+                // displayed value follows the phone locale and can show AM/PM.
+                <label className={`xp-time-field${alarmEnabled ? "" : " is-disabled"}`}>
+                  <span className="xp-field-input" aria-hidden="true">{alarmTime}</span>
+                  <input aria-label="Alarm time" type="time" value={alarmTime} onChange={(event) => edit(setAlarmTime)(event.target.value)} disabled={!alarmEnabled} />
+                </label>
+              ) : (
+                // Browsers draw the time input and its picker in the browser's locale, so the web gets 24-hour selects.
+                <span className="xp-time-selects">
+                  <select aria-label="Alarm hour" value={alarmTime.slice(0, 2)} onChange={(event) => edit(setAlarmTime)(`${event.target.value}:${alarmTime.slice(3, 5)}`)} disabled={!alarmEnabled}>
+                    {HOURS.map((hour) => <option key={hour} value={hour}>{hour}</option>)}
+                  </select>
+                  :
+                  <select aria-label="Alarm minute" value={alarmTime.slice(3, 5)} onChange={(event) => edit(setAlarmTime)(`${alarmTime.slice(0, 2)}:${event.target.value}`)} disabled={!alarmEnabled}>
+                    {MINUTES.map((minute) => <option key={minute} value={minute}>{minute}</option>)}
+                  </select>
+                </span>
+              )}
             </div>
           </fieldset>
           <RepeatEditor value={repeatRule} onChange={edit(setRepeatRule)} idPrefix={isNew ? "add-task" : "task-detail"} />
