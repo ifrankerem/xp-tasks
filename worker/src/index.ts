@@ -28,7 +28,9 @@ export interface Env {
  * app over `https://localhost` on Android and `capacitor://localhost` on iOS,
  * and `http://localhost:3000` is the dev server.
  */
-const FIXED_ORIGINS = ['https://localhost', 'capacitor://localhost', 'http://localhost:3000']
+// Keep the previous web origin working during the hosting transition.
+const FIXED_ORIGINS = ['https://localhost', 'capacitor://localhost', 'http://localhost:3000',
+  'https://my-we-btodo-app-v2.vercel.app']
 
 /** Whether this origin may call the voice endpoint at all. */
 function corsHeaders(origin: string | null, env: Env): Record<string, string> {

@@ -218,6 +218,14 @@ describe('POST /voice-intent', () => {
 })
 
 describe('CORS', () => {
+  it.each(['https://xp.irfankerem.com', 'https://my-we-btodo-app-v2.vercel.app',
+    'https://localhost', 'capacitor://localhost'])('allows %s during the hosting transition', async (origin) => {
+    const response = await call(makeEnv({ APP_URL: 'https://xp.irfankerem.com' }), {
+      method: 'OPTIONS', origin,
+    })
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin)
+  })
+
   // Issue case 18
   it('case 18: answers the preflight for an allowed origin', async () => {
     const response = await call(makeEnv(), { method: 'OPTIONS', origin: 'https://localhost' })

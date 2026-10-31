@@ -15,7 +15,7 @@
 </div>
 
 <p align="center">
-  <a href="https://mywebtodoapp-v2.netlify.app/">Try the live demo</a>
+  <a href="https://xp.irfankerem.com">Try the live demo</a>
 </p>
 
 ---
@@ -58,10 +58,10 @@ git clone https://github.com/ifrankerem/xp-tasks.git
 cd xp-tasks
 npm install
 npm run dev          # http://localhost:3000
-npm run build && npm start
+npm run build        # static site in out/; serve with nginx
 ```
 
-**Scripts:** `npm run dev` · `npm run build` · `npm run start` · `npm run lint` · `npm test`
+**Scripts:** `npm run dev` · `npm run build` · `npm run deploy` · `npm run lint` · `npm test`
 
 ---
 
@@ -95,7 +95,7 @@ until you tap it.
 
 - Tasks live under the user's Firebase user ID — scoped per account
 - Firebase Auth is required for sync
-- Vercel Analytics only; no ad SDKs
+- No analytics, trackers or ad SDKs
 - Full data portability via JSON export
 
 ---
@@ -115,3 +115,20 @@ MIT
 ## 🙏 Acknowledgements
 
 - [awesome-readme](https://github.com/matiassingers/awesome-readme) — structure inspiration for this README
+
+## Static hosting
+
+The web app lives at https://xp.irfankerem.com. `npm run build` exports the
+complete site to `out/`. After merge, `npm run deploy` builds and runs
+`rsync -a --delete out/ /srv/sites/xp/`; nginx serves that directory at the
+origin root with HTTPS. Use directory indexes for exported routes
+(`try_files $uri $uri/ =404;`), and allow `/sw.js` to revalidate on updates.
+The manifest and service worker use root-relative URLs.
+
+Keep the existing production `NEXT_PUBLIC_*` build variables, including Firebase
+`authDomain` and the VAPID public key. Firebase Auth, Firestore and the push Worker
+remain hosted where they are. Add `xp.irfankerem.com` to Firebase Authentication's
+authorized domains before testing Google sign-in. Reinstall the PWA from the new
+origin: browser storage, existing installations and push subscriptions belong to
+the old origin and do not migrate automatically. Sign in and enable notifications
+on the new site to register its push subscription.

@@ -21,7 +21,7 @@
   },
   "vars": {
     "VAPID_SUBJECT": "mailto:irfankeremarslann@gmail.com",
-    "APP_URL": "https://my-we-btodo-app-v2.vercel.app/"
+    "APP_URL": "https://xp.irfankerem.com"
   }
   // Secrets (set with `npx wrangler secret put <NAME>`):
   //   FIREBASE_SERVICE_ACCOUNT  - full service account JSON, one line
