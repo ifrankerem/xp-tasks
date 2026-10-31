@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { WebAnalytics } from '@/components/web-analytics'
 import { AuthProvider } from '@/lib/auth-context'
 import { ThemeProvider } from '@/components/theme-provider'
 import { XpIconDefs } from '@/components/xp-icons'
@@ -93,7 +92,6 @@ export default function RootLayout({
             {children}
           </AuthProvider>
         </ThemeProvider>
-        <WebAnalytics />
       </body>
     </html>
   )

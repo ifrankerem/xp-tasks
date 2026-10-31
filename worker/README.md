@@ -52,7 +52,7 @@ npx wrangler login                                        # opens a browser
 The script generates the VAPID key pair if needed (into the gitignored
 `.vapid.json`), then uploads `FIREBASE_SERVICE_ACCOUNT`, `VAPID_PUBLIC_KEY`,
 `VAPID_PRIVATE_KEY` and a random `TRIGGER_SECRET`. It prints the
-`NEXT_PUBLIC_VAPID_PUBLIC_KEY` line to copy into `.env.local` and Vercel.
+`NEXT_PUBLIC_VAPID_PUBLIC_KEY` line to copy into the web build environment (`.env.local` for local builds).
 
 > **Do not paste the service account JSON into `wrangler secret put`.** The
 > prompt reads one line, so a pretty-printed key file is truncated at the first
@@ -117,7 +117,9 @@ it answers only to a token this project signed. The signing keys are read from
 Google's public JWKS and cached for as long as that response says they are fresh.
 
 CORS allows the Capacitor origins (`https://localhost`, `capacitor://localhost`),
-`http://localhost:3000` and the origin of `APP_URL`; anything else gets no CORS
+`http://localhost:3000`, the origin of `APP_URL` (now `https://xp.irfankerem.com`)
+and the previous web origin `https://my-we-btodo-app-v2.vercel.app` during the
+transition, so existing web installations can still call the Worker. Anything else gets no CORS
 headers.
 
 The `ai` binding in `wrangler.jsonc` is what makes this endpoint work. Adding it
