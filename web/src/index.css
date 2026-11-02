@@ -125,3 +125,26 @@ legend { color: #aaa; font-size: 13px; margin-bottom: 10px; }
 .delete-button { color: #ff6b6b; border-color: #3b1e1e; background: transparent; }
 .done-text { color: #5db680; }
 @media (max-height: 700px) { .calendar-toolbar { margin-bottom: 4px; } .calendar-toolbar .text-button { min-height: 30px; } .calendar-header { margin-bottom: 4px; } }
+
+.section-description { color: #777; font-size: 13px; margin: -10px 0 24px; }
+.archive-filters { display: flex; gap: 6px; margin-bottom: 20px; }
+.archive-filters button { flex: 1; min-width: 0; min-height: 44px; padding: 8px 5px; background: #0d0d0d; color: #888; border: 1px solid #1c1c1c; border-radius: 12px; font-size: 11px; }
+.archive-filters button[aria-pressed=true] { background: #eee; color: #000; border-color: #eee; }
+.archive-filters span { margin-left: 3px; opacity: .65; }
+.archive-list { display: flex; flex-direction: column; gap: 12px; padding: 0; list-style: none; }
+.archive-card { padding: 14px; border: 1px solid #1c1c1c; background: #0d0d0d; border-radius: 18px; }
+.archive-summary { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.archive-actions { display: flex; gap: 8px; }
+.archive-actions button { flex: 1; min-width: 0; font-size: 12px; }
+.settings-card { border: 1px solid #1c1c1c; background: #0d0d0d; border-radius: 20px; padding: 20px; margin-bottom: 16px; }
+.settings-card h2 { font-size: 17px; margin: 0 0 14px; }
+.settings-card p { font-size: 13px; color: #999; line-height: 1.7; margin: 12px 0; overflow-wrap: anywhere; }
+.settings-card p.account-email { color: #eee; font-size: 15px; }
+.settings-card p.done-text { color: #5db680; }
+.settings-card p.error { color: #ff6b6b; }
+.settings-card button { width: 100%; margin-top: 10px; }
+.backup-upload { position: relative; display: flex; align-items: center; justify-content: center; min-height: 48px; margin-top: 12px; padding: 12px 18px; border: 1px solid #292929; border-radius: 13px; background: #111; font-size: 14px; font-weight: 600; color: #ddd; }
+.backup-upload input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.backup-upload:focus-within { outline: 2px solid #ff9f43; outline-offset: 4px; }
+.backup-upload:has(input:disabled) { opacity: .45; }
+.detail-header h1 { color: #f2f2f2; }

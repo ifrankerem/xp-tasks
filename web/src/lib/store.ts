@@ -152,6 +152,25 @@ export class Store {
     return this.write(() => this.patch(id, restorePatch()))
   }
 
+  /** Validated backup rows: preserve IDs/order and never revive permanent deletions. */
+  async importTasks(entries: { task: Task; photo: Blob | null }[]) {
+    let imported = 0
+    let skipped = 0
+    await this.write(async () => {
+      for (const { task, photo } of entries) {
+        if (await this.db.tombstones.get(task.id)) { skipped++; continue }
+        const existing = await this.db.tasks.get(task.id)
+        await this.db.tasks.put({ ...task, photo: photo ? existing?.photo ?? null : null, updated: existing?.updated ?? '' })
+        const body = toBody(task)
+        // Follow create with update: a server ID collision must still restore the backup fields.
+        if (!existing) await this.queue({ taskId: task.id, kind: 'create', body })
+        await this.queue({ taskId: task.id, kind: 'update', body, photo })
+        imported++
+      }
+    })
+    return { imported, skipped }
+  }
+
   /** Kalıcı sil: the record and its photo, for good. */
   purge(id: string) {
     return this.write(async () => {
