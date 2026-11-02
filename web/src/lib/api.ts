@@ -88,3 +88,18 @@ export function pocketbaseApi(pb: PocketBase): TaskApi {
       }),
   }
 }
+
+/** Protected photos need a short-lived file token, shared by this session's thumbnails. */
+export function createPhotoUrl(pb: PocketBase) {
+  let token: Promise<string> | undefined
+  let expires = 0
+  return async (task: Pick<Task, 'id' | 'photo'>, large: boolean): Promise<string> => {
+    if (!task.photo) return ''
+    if (!token || Date.now() >= expires) {
+      expires = Date.now() + 90_000
+      token = pb.files.getToken({ requestKey: null }).catch((error) => { token = undefined; throw error })
+    }
+    return pb.files.getURL({ id: task.id, collectionName: 'tasks' }, task.photo,
+      { token: await token, ...(large ? {} : { thumb: '240x240' }) })
+  }
+}

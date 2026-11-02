@@ -164,11 +164,15 @@ export class Sync {
  */
 export function startSync(sync: Sync, store: Store, onResult: (result: SyncResult) => void): () => void {
   let timer: ReturnType<typeof setTimeout> | undefined
+  let stopped = false
   const run = () => {
+    if (stopped) return
     clearTimeout(timer)
     void sync.run().then(async (result) => {
+      if (stopped) return
       onResult(result)
-      if (result !== 'ok' || (await store.db.outbox.count()) > 0) timer = setTimeout(run, 30_000)
+      const retry = result !== 'ok' || (await store.db.outbox.count()) > 0
+      if (!stopped && retry) timer = setTimeout(run, 30_000)
     })
   }
   const soon = () => {
@@ -186,6 +190,7 @@ export function startSync(sync: Sync, store: Store, onResult: (result: SyncResul
   run()
 
   return () => {
+    stopped = true
     clearTimeout(timer)
     offChange()
     window.removeEventListener('online', run)
