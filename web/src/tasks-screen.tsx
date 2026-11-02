@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import {
   closestCenter,
@@ -21,6 +21,7 @@ import { today, addDays, parseDay } from './lib/day'
 import { currentOccurrence, isOccurrenceDone, type Task } from './lib/task'
 import type { Store } from './lib/store'
 import { TaskPhoto } from './task-photo'
+import { useNow } from './lib/use-now'
 
 function secondary(task: Task, now: Date) {
   if (!task.alarm) return task.note.trim() || 'tarihsiz'
@@ -53,14 +54,14 @@ function secondary(task: Task, now: Date) {
 function TaskRow({
   task,
   store,
-  onEdit,
+  onOpen,
   disabled,
   now,
   onError,
 }: {
   task: Task
   store: Store
-  onEdit(id: string): void
+  onOpen(id: string): void
   disabled: boolean
   now: Date
   onError(message: string): void
@@ -96,8 +97,8 @@ function TaskRow({
       <button
         type="button"
         className="task-content"
-        aria-label={`${task.title}: düzenle`}
-        onClick={() => onEdit(task.id)}
+        aria-label={`${task.title}: aç`}
+        onClick={() => onOpen(task.id)}
       >
         <span className="task-title">{task.title}</span>
         <span className={`task-secondary ${task.alarm ? 'alarm-text' : ''}`}>
@@ -120,7 +121,7 @@ function TaskRow({
   )
 }
 
-export function TasksScreen({ store, onEdit }: { store: Store; onEdit(id: string): void }) {
+export function TasksScreen({ store, onOpen }: { store: Store; onOpen(id: string): void }) {
   const tasks = useLiveQuery(
     () => store.db.tasks.where('status').equals('open').sortBy('position'),
     [store],
@@ -128,16 +129,7 @@ export function TasksScreen({ store, onEdit }: { store: Store; onEdit(id: string
   const [search, setSearch] = useState('')
   const [grid, setGrid] = useState(false)
   const [error, setError] = useState('')
-  const [now, setNow] = useState(() => new Date())
-  useEffect(() => {
-    const refresh = () => setNow(new Date())
-    document.addEventListener('visibilitychange', refresh)
-    const timer = window.setInterval(refresh, 60_000)
-    return () => {
-      document.removeEventListener('visibilitychange', refresh)
-      clearInterval(timer)
-    }
-  }, [])
+  const now = useNow()
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -233,7 +225,7 @@ export function TasksScreen({ store, onEdit }: { store: Store; onEdit(id: string
                   key={task.id}
                   task={task}
                   store={store}
-                  onEdit={onEdit}
+                  onOpen={onOpen}
                   disabled={Boolean(query)}
                   now={now}
                   onError={setError}

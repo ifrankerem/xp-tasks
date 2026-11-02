@@ -7,6 +7,9 @@ import { Sync, startSync, type SyncResult } from './lib/sync'
 import { TaskForm } from './task-form'
 import { TasksScreen } from './tasks-screen'
 import { PhotoUrlContext } from './task-photo'
+import { CalendarScreen } from './calendar-screen'
+import { TaskPage } from './task-page'
+import { validDay } from './lib/calendar'
 
 function Login({ pb }: { pb: PocketBase }) {
   const [error, setError] = useState('')
@@ -147,8 +150,9 @@ export function App({ store, pb }: { store: Store; pb: PocketBase }) {
       stop()
     }
   }, [account, pb, store])
-  const navigate = (path: string) => {
-    history.pushState({ xpTasks: true }, '', `#${path}`)
+  const navigate = (path: string, replace = false) => {
+    if (replace) history.replaceState(history.state, '', `#${path}`)
+    else history.pushState({ xpTasks: true }, '', `#${path}`)
     setHash(`#${path}`)
   }
   const back = () => {
@@ -157,10 +161,13 @@ export function App({ store, pb }: { store: Store; pb: PocketBase }) {
   }
   if (!account) return <Login pb={pb} />
   const route = hash.slice(1).split('?')[0] || '/'
-  const edit = /^\/gorev\/([a-z0-9]{8,32})$/.exec(route)
+  const query = hash.includes('?') ? hash.slice(hash.indexOf('?') + 1) : ''
+  const requestedDay = new URLSearchParams(query).get('gun')
+  const occurrence = validDay(requestedDay) ? requestedDay : undefined
+  const detail = /^\/gorev\/([a-z0-9]{8,32})$/.exec(route)
+  const edit = /^\/gorev\/([a-z0-9]{8,32})\/duzenle$/.exec(route)
   const form = route === '/yeni' || Boolean(edit)
   const names: Record<string, string> = {
-    '/takvim': 'Takvim',
     '/arsiv': 'Arşiv',
     '/ayarlar': 'Ayarlar',
   }
@@ -208,14 +215,28 @@ export function App({ store, pb }: { store: Store; pb: PocketBase }) {
               <TaskForm
                 store={store}
                 taskId={edit?.[1]}
+                initialDate={route === '/yeni' ? occurrence : undefined}
                 onCancel={back}
                 onSaved={(task) => {
                   if (task.date?.slice(5) === '12-20') setBirthday(true)
                   else back()
                 }}
               />
+            ) : detail ? (
+              <TaskPage
+                key={detail[1]}
+                store={store}
+                taskId={detail[1]!}
+                occurrence={occurrence}
+                onBack={back}
+                onEdit={() =>
+                  navigate(`/gorev/${detail[1]}/duzenle${occurrence ? `?gun=${occurrence}` : ''}`)
+                }
+              />
             ) : route === '/' ? (
-              <TasksScreen store={store} onEdit={(id) => navigate(`/gorev/${id}`)} />
+              <TasksScreen store={store} onOpen={(id) => navigate(`/gorev/${id}`)} />
+            ) : route === '/takvim' ? (
+              <CalendarScreen store={store} query={query} onNavigate={navigate} />
             ) : (
               <section>
                 <header className="page-header">
@@ -233,7 +254,7 @@ export function App({ store, pb }: { store: Store; pb: PocketBase }) {
                 </div>
               </section>
             )}
-            {!form && (
+            {!form && !detail && (
               <nav className="bottom-nav" aria-label="Ana gezinme">
                 {[
                   ['/', 'Görevler', '☑'],
