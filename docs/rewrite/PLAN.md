@@ -26,6 +26,16 @@ Each phase is one PR into `v2`. The old code is removed only in the cutover PR.
   - On a repeating task, "Tamamlandı" sets only `doneOn` to that occurrence's date.
   - "Kalıcı sil" is the only real delete. Its id stays as a local tombstone, so the task cannot come back.
 - **Order:** `position`, a fractional number. A drag writes only the moved task.
+- **Data layer (`web/src/lib/`):**
+  - `day.ts`: local calendar days.
+  - `repeat.ts`: the repeat rules.
+  - `task.ts`: the pure task rules and the record mapping.
+  - `store.ts`: Dexie and the outbox.
+  - `sync.ts`: push, pull, realtime.
+  - `api.ts`: the only code that talks to PocketBase.
+- **One-off alarm with no date:** it rings once, on the day the task was created. The form fills in the date anyway.
+- **Weekly "every N weeks":** counted in Monday-first weeks from the anchor's week. v1 counted Sunday-first. Migration (phase 7) reports any task with `interval > 1` whose days include Sunday.
+- **A pull always refreshes the auth token first.** PocketBase answers a bad token like a guest: `200` with no tasks. Without the refresh, that empty answer would read as "everything was deleted".
 - **Repeat anchor:** the task's `date`, or else its `createdAt`. The same pure function serves the calendar, the list text and the alarms. The native side ports it, and both sides run against the same JSON test vectors.
 - **Birthday task (kept from v1):** every year there must be one "İrfan Kerem Arslan DOGUM GÜNÜ" task on 20 December. It is created once, with a fixed id per year (`birthday` + year, e.g. `birthday2026`), so two devices opening at the same time still make one record.
   - v1 created it only when a task was added for 20 December. v2 makes sure it exists for the coming 20 December.

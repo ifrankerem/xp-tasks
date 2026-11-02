@@ -1,5 +1,3 @@
-/// <reference path="../pb_data/types.d.ts" />
-
 // Initial schema for xp-tasks v2: server settings, the single-owner `users`
 // collection, and `tasks`.
 
