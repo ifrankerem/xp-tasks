@@ -1,0 +1,26 @@
+services:
+  pocketbase:
+    build: .
+    image: xp-pocketbase:0.40.6
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8090"
+    volumes:
+      - /srv/xp/pb_data:/pb/pb_data
+      - ./pb_migrations:/pb/pb_migrations:ro
+    command:
+      - serve
+      - --http=0.0.0.0:8090
+      - --dir=/pb/pb_data
+      - --migrationsDir=/pb/pb_migrations
+      # Schema changes come only from files in pb_migrations, never from the dashboard.
+      - --automigrate=false
+      # Explicit: dev mode prints every SQL statement to the log.
+      - --dev=false
+      # The site itself is same-origin; https://localhost is the Capacitor Android WebView.
+      - --origins=https://xp.irfankerem.com,https://localhost
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8090/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
