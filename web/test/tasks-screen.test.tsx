@@ -19,7 +19,7 @@ describe('tasks screen', () => {
   it('keeps manual order through list/grid and searches Turkish title and note', async () => {
     await store.create({ title: 'İLK GÖREV' })
     await store.create({ title: 'Market', note: 'IŞIK al' })
-    render(<TasksScreen store={store} onEdit={vi.fn()} />)
+    render(<TasksScreen store={store} onOpen={vi.fn()} />)
     const list = await screen.findByRole('list', { name: 'Açık görevler' })
     const titles = () =>
       within(list)
@@ -47,7 +47,7 @@ describe('tasks screen', () => {
     const api = new FakeApi(),
       sync = new Sync(store, api)
     await sync.run()
-    render(<TasksScreen store={store} onEdit={vi.fn()} />)
+    render(<TasksScreen store={store} onOpen={vi.fn()} />)
     const user = userEvent.setup()
     await user.click(await screen.findByRole('button', { name: 'Tek görev: tamamlandı' }))
     await waitFor(() => expect(screen.queryByText('Tek görev')).not.toBeInTheDocument())
@@ -86,7 +86,7 @@ describe('tasks screen', () => {
         toJSON: () => ({}),
       }
     })
-    render(<TasksScreen store={store} onEdit={vi.fn()} />)
+    render(<TasksScreen store={store} onOpen={vi.fn()} />)
     const handle = await screen.findByRole('button', { name: 'Birinci: sırala' })
     handle.focus()
     const user = userEvent.setup()

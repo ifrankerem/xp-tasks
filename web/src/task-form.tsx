@@ -6,10 +6,12 @@ import type { RepeatRule } from './lib/repeat'
 import type { Editable, NewTask, Store } from './lib/store'
 import type { Task } from './lib/task'
 import { TaskPhoto } from './task-photo'
+import type { Day } from './lib/day'
 
 export function TaskForm(props: {
   store: Store
   taskId?: string
+  initialDate?: Day
   onSaved(task: Task): void
   onCancel(): void
 }) {
@@ -25,24 +27,32 @@ export function TaskForm(props: {
         <button onClick={props.onCancel}>Geri dön</button>
       </section>
     )
-  return <FormFields key={props.taskId ?? 'new'} {...props} task={record ?? undefined} />
+  return (
+    <FormFields
+      key={props.taskId ?? props.initialDate ?? 'new'}
+      {...props}
+      task={record ?? undefined}
+    />
+  )
 }
 
 function FormFields({
   store,
   task,
+  initialDate,
   onSaved,
   onCancel,
 }: {
   store: Store
   task?: Task
+  initialDate?: Day
   onSaved(task: Task): void
   onCancel(): void
 }) {
   const [initial] = useState(task)
   const [title, setTitle] = useState(task?.title ?? '')
   const [note, setNote] = useState(task?.note ?? '')
-  const [date, setDate] = useState(task?.date ?? '')
+  const [date, setDate] = useState(task?.date ?? initialDate ?? '')
   const [alarm, setAlarm] = useState(task?.alarm ?? '')
   const [kind, setKind] = useState<RepeatRule['kind'] | 'none'>(task?.repeat?.kind ?? 'none')
   const [interval, setInterval] = useState(

@@ -2,15 +2,16 @@
 
 For whoever continues this work in a new session. Read [PLAN.md](PLAN.md) and [BUGS.md](BUGS.md) first.
 
-## State (2026-11-02)
+## State (2026-11-03)
 
 | Phase | State |
 | --- | --- |
 | 1. PocketBase schema + runbook | Merged (#31) and live on devbox: `https://xp.irfankerem.com/api/` |
 | 2. Data layer + sync + tests | Merged into `v2` (#32) |
-| 3. Görevler + form | Implemented on `v2-phase3-tasks`; PR into `v2` for review |
-| 4. Takvim + task page | Next |
-| 5–8 | Not started |
+| 3. Görevler + form | Merged into `v2` (#34) |
+| 4. Takvim + task page | Implemented on `v2-phase4-calendar`; PR into `v2` for review (issue #35) |
+| 5. Arşiv + Ayarlar | Next |
+| 6–8. Native alarms, migration, cutover | Not started |
 
 ## How the work is done
 
@@ -55,18 +56,29 @@ For whoever continues this work in a new session. Read [PLAN.md](PLAN.md) and [B
 - `web/src/lib/photo.ts`: JPEG Blob compression ported from v1.
 - `web/src/task-photo.tsx`: local pending-photo previews and protected server photos. The server file field is protected and allows `240x240` thumbnails: `createPhotoUrl` in `api.ts` shares a short-lived file token within the session. Do not replace these with unsigned `/api/files/` URLs.
 - `startSync` now ignores results after cleanup, preventing in-flight requests from resurrecting retry timers after logout/unmount.
-- `#/yeni` opens the add form; `#/gorev/:id` currently opens edit directly. Calendar/archive/settings routes are intentionally placeholders until their phases.
+- `#/yeni` opens the add form. Phase 4 adds task details and moves editing to `#/gorev/:id/duzenle`; archive/settings remain placeholders.
 - No deployment, Firebase changes, or Android changes in phase 3.
 
 Validation: 85 v2 tests including all 7 real PocketBase integration tests; 271 v1 tests; both TypeScript checks, worker typecheck, root lint, and both builds. The alarm-date, partial-edit, protected-photo and sync-cleanup tests were checked with deliberate failing mutations, then restored. Chromium checks covered mobile login/list/grid/form, keyboard reorder, local offline save/complete, reload with pending data/photos, and desktop sizing. Screenshots are under `~/inbox/out/xp-phase3-*.png` (not committed).
 
-## Next: phase 4 (Takvim + task page)
+## Phase 4 implementation
 
-1. Start from `v2` after phase 3 is merged. Use `~/inbox/xp-mockups/calendar-v2.html` for the month/day screen and the right phone in `calendar.html` for task details.
-2. Replace the `#/takvim` placeholder with the month grid and selected-day list. Store month/day in the URL (`#/takvim?ay=YYYY-MM&gun=YYYY-MM-DD`) and use the existing `occursOnDay` helpers; changing month does not change the selected day.
-3. Show at most two ellipsized title chips per day plus `+N`, orange for alarms, following PLAN.md. Read today on render/resume.
-4. Replace `#/gorev/:id` with the live-by-id task detail page. Move the current edit form to an explicit edit route. Buttons: Tamamlandı · Düzenle · Sil, using the existing Store methods.
-5. Add `+ Bu güne görev ekle`, prefilling the selected date in the form. Browser/app Back must restore the exact calendar URL. Keep the hash-history behavior in `app.tsx`; do not introduce a separate return-screen state.
-6. Add the calendar-back regression component test and verify it fails when calendar URL preservation is deliberately broken.
+- `web/src/calendar-screen.tsx`: Monday-first month grid, two ellipsized title chips per cell plus `+N`, alarm accents and the selected day's full list in manual order. All occurrences use the existing task rules.
+- `web/src/lib/calendar.ts`: validates URL dates, builds complete calendar weeks and shifts months across year boundaries. Month and selected day are independent URL values: `#/takvim?ay=YYYY-MM&gun=YYYY-MM-DD`.
+- Calendar selection/month changes replace the current history entry; opening details/forms pushes one. Browser/app Back restores the exact calendar URL, including after edit or add. There is no separate return-screen state.
+- `web/src/task-page.tsx`: reads the current task by id from Dexie and shows title/date/alarm/repeat/note/photo. Complete and delete use Store methods; missing records and failed writes have visible states. Protected and pending photos reuse phase 3 handling.
+- `#/gorev/:id?gun=YYYY-MM-DD` carries the selected occurrence; `#/gorev/:id/duzenle` edits it. Completion from the calendar or its detail page uses the selected occurrence date, leaving repeats open. Invalid occurrence queries fall back to the task's current occurrence.
+- `#/yeni?gun=YYYY-MM-DD` prefills the date. `web/src/lib/use-now.ts` refreshes the list, calendar and detail clock on resume and every minute, reading the current date on each render.
+- No new dependencies, data-layer changes, deployment, Firebase changes or Android changes.
+
+Validation: 106 v2 tests including all 7 real PocketBase integration tests; 271 v1 tests; web/root TypeScript checks, worker typecheck, root lint and both builds. Deliberate mutations of calendar Back, selected-repeat completion, month-selection preservation and the two-chip limit each failed their guarding test; all mutations were restored. Chromium checks covered real browser Back, edit cancel/save, date-prefilled add, live detail updates/photos, selected-repeat completion, local delete/reload, mobile widths 320/360/393 and desktop width 1280, with API requests blocked. Screenshots are under `~/inbox/out/xp-phase4-*.png` (not committed). Root typecheck must run after the root build, rather than concurrently: the build replaces `.next/types`.
+
+## Next: phase 5 (Arşiv + Ayarlar)
+
+1. Start from `v2` after phase 4 is merged; create a separate phase branch and PR into `v2`.
+2. Replace the archive placeholder with live archived tasks, distinguishing completed and deleted tasks. Use Store restore and permanent-delete operations; permanent delete asks for one confirmation and preserves the existing tombstone behavior.
+3. Add account/logout and JSON backup export/import of all tasks, including photos. Preserve `id` and `position`; importing the same backup twice must not duplicate tasks or change their order.
+4. Add the alarm-permission status area. Native permission inspection/deep links belong to phase 6; keep the web state honest about platform support.
+5. Reuse the existing local-store/outbox path, photo handling, styles and hash history. Test archive/restore/purge and backup round trips, including repeat tasks and local pending photos. Do not remove the old app or deploy yet.
 
 Offline data edits already persist in IndexedDB. App-shell/service-worker caching and the Android integration still belong to the later cutover/native work; do not claim a fresh browser can load the v2 shell without a network connection yet.
