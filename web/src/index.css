@@ -139,6 +139,9 @@ legend { color: #aaa; font-size: 13px; margin-bottom: 10px; }
 .settings-card { border: 1px solid #1c1c1c; background: #0d0d0d; border-radius: 20px; padding: 20px; margin-bottom: 16px; }
 .settings-card h2 { font-size: 17px; margin: 0 0 14px; }
 .settings-card p { font-size: 13px; color: #999; line-height: 1.7; margin: 12px 0; overflow-wrap: anywhere; }
+.alarm-checks { list-style: none; margin: 0; padding: 0; }
+.alarm-checks li { padding: 10px 0; border-top: 1px solid #1c1c1c; font-size: 14px; line-height: 1.6; }
+.alarm-checks li:first-child { border-top: 0; }
 .settings-card p.account-email { color: #eee; font-size: 15px; }
 .settings-card p.done-text { color: #5db680; }
 .settings-card p.error { color: #ff6b6b; }

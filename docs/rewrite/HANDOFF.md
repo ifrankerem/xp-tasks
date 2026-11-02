@@ -11,7 +11,7 @@ For whoever continues this work in a new session. Read [PLAN.md](PLAN.md) and [B
 | 3. Görevler + form | Merged into `v2` (#34) |
 | 4. Takvim + task page | PR #36 open into `v2` (issue #35) |
 | 5. Arşiv + Ayarlar | Implemented on `v2-phase5-archive-settings`; PR into `v2` for review (issue #37), depends on #36 |
-| 6. Native alarm module | Next |
+| 6. Native alarm module | PR into `v2-phase5-archive-settings` (stacked on #38) |
 | 7–8. Migration, cutover | Not started |
 
 ## How the work is done
@@ -97,3 +97,43 @@ Validation: 131 v2 tests including 7 real PocketBase integration tests; 271 v1 t
 6. Use the devbox SDK, roughly 3 GB Gradle heap and no emulator. Ask for wireless-debugging pairing details for phone tests; compare installed signing certificate before replacing the old app. Place the debug APK under `~/inbox/out/` and test screen-off, silent mode, reboot and every action on the device. Do not claim device validation without it.
 
 Offline data edits already persist in IndexedDB. App-shell/service-worker caching and the Android integration still belong to the later cutover/native work; do not claim a fresh browser can load the v2 shell without a network connection yet.
+
+## Phase 6 implementation
+
+- `android/app/src/main/java/com/ifrankerem/taskmanager/alarms/`:
+  - `AlarmMath.kt`: a port of `nextAlarm` and the repeat rules. It must pass `test-vectors/alarms.json`, the same vectors the web test (`web/test/alarm-vectors.test.ts`) runs. Change both sides together.
+  - `AlarmStore.kt`: SharedPreferences with the alarm fields of each task, pending "Tamamlandı" actions, snoozes and stable notification ids.
+  - `AlarmScheduler.kt`: one `setAlarmClock` per task plus one per snooze. It rebuilds everything from the store, so it is safe to run any time.
+  - `AlarmReceiver.kt`: `AlarmReceiver` starts the ringing service. `RescheduleReceiver` sets alarms again after boot, a time or zone change, and an app update.
+  - `AlarmService.kt`: a foreground service of type `mediaPlayback`.
+    - It loops sound on `USAGE_ALARM`, vibrates, and posts a full-screen notification.
+    - Buttons: Tamamlandı, 10 dk / 1 saat ertele, Kapat.
+    - After 60 s without an answer it stops and leaves a "Kaçırıldı" notification.
+    - It logs to tag `XpAlarm`.
+  - `AlarmActivity.kt`: the black ringing screen over the lock screen.
+  - `XpAlarmsPlugin.kt`: the bridge for `web/src/lib/native-alarms.ts`.
+- `MainActivity.onResume` opens the ringing screen while an alarm rings, so the alarm can always be stopped, even if its notification never showed.
+- Web:
+  - `web/capacitor.config.ts` packages `web/dist` into `../android`. The root config still belongs to v1.
+  - `main.tsx` uses `https://xp.irfankerem.com` inside the app, because the WebView's origin is `https://localhost`.
+  - Ayarlar lists every alarm permission, with a "Düzelt" button for each missing one.
+- Build:
+  ```sh
+  cd web && npm run build && npx cap sync android
+  cd ../android && ./gradlew assembleDebug -PxpAlarmTest
+  ```
+  - `-PxpAlarmTest` builds `com.ifrankerem.taskmanager.alarmtest`, "Görevler (test)", which installs next to the old app.
+  - Without the flag the build keeps `com.ifrankerem.taskmanager`. The phone's old app is not signed with devbox's debug key, so that build cannot replace it until the laptop keystore is used.
+- Device tests on the S25 (Android 17), with A–D being the four test alarms:
+  - Passed:
+    - exact alarm clocks were set (`dumpsys alarm`);
+    - a heads-up while the phone was in use, and tapping it opened the screen (A);
+    - the full screen while locked (B);
+    - 10 dk ertele (B rang again at +10 min);
+    - Tamamlandı on a one-off task (C, archived in the app);
+    - Tamamlandı on a daily task (D: next alarm set for tomorrow, the task stays open with that day done);
+    - alarms were set again after an app update.
+  - Not run, at the owner's request to stop testing: the 60 s timeout and "Kaçırıldı", Kapat, 1 saat, and reboot.
+- Found during the device tests:
+  - Without the notification permission the sound rang with nothing on screen to stop it. That led to the `onResume` fallback.
+  - `appops` reports `USE_FULL_SCREEN_INTENT` rejected, yet Samsung still showed the full screen on the lock screen.

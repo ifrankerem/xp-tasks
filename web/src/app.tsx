@@ -4,6 +4,7 @@ import { ClientResponseError } from 'pocketbase'
 import { createPhotoUrl, downloadPhoto, pocketbaseApi } from './lib/api'
 import type { Store } from './lib/store'
 import { Sync, startSync, type SyncResult } from './lib/sync'
+import { nativeAlarms, startNativeAlarms } from './lib/native-alarms'
 import { TaskForm } from './task-form'
 import { TasksScreen } from './tasks-screen'
 import { PhotoUrlContext } from './task-photo'
@@ -109,6 +110,7 @@ export function App({ store, pb }: { store: Store; pb: PocketBase }) {
   const [result, setResult] = useState<SyncResult>('ok')
   const [error, setError] = useState('')
   const [birthday, setBirthday] = useState(false)
+  const [alarmError, setAlarmError] = useState('')
   const photoUrl = useMemo(
     () => (auth.token ? createPhotoUrl(pb) : async () => ''),
     [pb, auth.token],
@@ -129,6 +131,8 @@ export function App({ store, pb }: { store: Store; pb: PocketBase }) {
       window.removeEventListener('popstate', change)
     }
   }, [])
+  // Alarms ring from the local store, signed in or not; only Android has them.
+  useEffect(() => (nativeAlarms ? startNativeAlarms(store, nativeAlarms, setAlarmError) : undefined), [store])
   useEffect(() => {
     if (!account) return
     let active = true
@@ -207,6 +211,11 @@ export function App({ store, pb }: { store: Store; pb: PocketBase }) {
             {error && (
               <p role="alert" className="error">
                 {error}
+              </p>
+            )}
+            {alarmError && (
+              <p role="alert" className="error">
+                {alarmError}
               </p>
             )}
             {form ? (

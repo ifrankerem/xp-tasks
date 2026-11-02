@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { exportBackup, importBackup } from './lib/backup'
 import { today } from './lib/day'
+import { nativeAlarms, type AlarmPermissions } from './lib/native-alarms'
 import type { Store } from './lib/store'
 import type { Task } from './lib/task'
 import { useNow } from './lib/use-now'
@@ -137,16 +138,90 @@ export function SettingsScreen({
           </p>
         )}
       </section>
-      <section className="settings-card" aria-labelledby="alarm-title">
-        <h2 id="alarm-title">Alarm izinleri</h2>
-        <p>
-          Tarayıcı bildirim izni: <strong>{permission}</strong>
+      {nativeAlarms ? (
+        <NativeAlarmSettings />
+      ) : (
+        <section className="settings-card" aria-labelledby="alarm-title">
+          <h2 id="alarm-title">Alarm izinleri</h2>
+          <p>
+            Tarayıcı bildirim izni: <strong>{permission}</strong>
+          </p>
+          <p className="field-hint">
+            Bu tarayıcıda uygulama kapalıyken alarm çalmaz; alarmlar Android uygulamasında çalar.
+          </p>
+        </section>
+      )}
+    </section>
+  )
+}
+
+type AlarmCheck = { key: keyof AlarmPermissions; label: string; fix: string; kind: 'notifications' | 'exact' | 'fullScreen' | 'battery' | 'sound' }
+
+const ALARM_CHECKS: AlarmCheck[] = [
+  { key: 'notifications', label: 'Bildirimler', fix: 'Alarm bildirimi gösterilemez.', kind: 'notifications' },
+  { key: 'exact', label: 'Tam zamanlı alarm', fix: 'Alarm geç çalabilir.', kind: 'exact' },
+  { key: 'fullScreen', label: 'Kilit ekranında tam ekran', fix: 'Ekran kapalıyken yalnızca bildirim görünür.', kind: 'fullScreen' },
+  { key: 'battery', label: 'Pil kısıtlaması yok', fix: 'Samsung: Pil → Kısıtlamasız seçin.', kind: 'battery' },
+  { key: 'alarmVolume', label: 'Alarm sesi açık', fix: 'Alarm ses seviyesi sıfır.', kind: 'sound' },
+  { key: 'dndAllowsAlarms', label: 'Rahatsız Etmeyin alarmlara izin veriyor', fix: 'Rahatsız Etmeyin alarmları susturuyor.', kind: 'sound' },
+]
+
+/** Android only: what stands between a task alarm and a ringing phone. */
+function NativeAlarmSettings() {
+  const [status, setStatus] = useState<AlarmPermissions | null>(null)
+  const [failed, setFailed] = useState(false)
+  useEffect(() => {
+    const load = () => {
+      nativeAlarms!
+        .permissions()
+        .then((next) => {
+          setStatus(next)
+          setFailed(false)
+        })
+        .catch(() => setFailed(true))
+    }
+    load()
+    // Coming back from a system settings page.
+    document.addEventListener('visibilitychange', load)
+    return () => document.removeEventListener('visibilitychange', load)
+  }, [])
+  const fix = async (check: AlarmCheck) => {
+    if (check.kind === 'notifications') {
+      const next = await nativeAlarms!.requestNotifications()
+      setStatus(next)
+      if (next.notifications) return
+    }
+    await nativeAlarms!.openSettings({ kind: check.kind })
+  }
+  return (
+    <section className="settings-card" aria-labelledby="alarm-title">
+      <h2 id="alarm-title">Alarm izinleri</h2>
+      {failed && (
+        <p role="alert" className="error">
+          Alarm izinleri okunamadı.
         </p>
-        <p className="field-hint">
-          Bu tarayıcıda uygulama kapalıyken alarm çalmaz. Android alarm izinleri uygulamanın Android
-          sürümünde yönetilecek.
-        </p>
-      </section>
+      )}
+      {status && (
+        <ul className="alarm-checks">
+          {ALARM_CHECKS.map((check) => {
+            const ok = Boolean(status[check.key])
+            return (
+              <li key={check.key}>
+                <span className={ok ? 'done-text' : 'error'}>{ok ? '✓' : '✗'}</span>{' '}
+                <strong>{check.label}</strong>
+                {!ok && (
+                  <>
+                    <span className="field-hint"> {check.fix}</span>{' '}
+                    <button type="button" className="text-button" onClick={() => void fix(check)}>
+                      Düzelt
+                    </button>
+                  </>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
     </section>
   )
 }

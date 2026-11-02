@@ -5,7 +5,7 @@
 import Dexie, { type Table } from 'dexie'
 import { today, type Day } from './day'
 import type { RepeatRule } from './repeat'
-import { completionPatch, deletionPatch, restorePatch, toBody, type Task, type TaskFields } from './task'
+import { anchorOf, occursOnDay, completionPatch, deletionPatch, restorePatch, toBody, type Task, type TaskFields } from './task'
 
 export interface OutboxEntry {
   seq?: number
@@ -139,6 +139,16 @@ export class Store {
     return this.write(async () => {
       const task = await this.db.tasks.get(id)
       if (task) await this.patch(id, completionPatch(task, now, occurrence))
+    })
+  }
+
+  /** An old native action must not undo a later completion, deletion or schedule edit. */
+  completeFromAlarm(id: string, at: Date, occurrence: Day) {
+    return this.write(async () => {
+      const task = await this.db.tasks.get(id)
+      if (!task || task.status !== 'open') return
+      if (task.repeat ? !occursOnDay(task, occurrence) || (task.doneOn && task.doneOn >= occurrence) : anchorOf(task) !== occurrence) return
+      await this.patch(id, completionPatch(task, at, occurrence))
     })
   }
 
