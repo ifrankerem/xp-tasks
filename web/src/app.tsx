@@ -1,7 +1,7 @@
 import { Component, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import type PocketBase from 'pocketbase'
 import { ClientResponseError } from 'pocketbase'
-import { createPhotoUrl, pocketbaseApi } from './lib/api'
+import { createPhotoUrl, downloadPhoto, pocketbaseApi } from './lib/api'
 import type { Store } from './lib/store'
 import { Sync, startSync, type SyncResult } from './lib/sync'
 import { TaskForm } from './task-form'
@@ -10,6 +10,8 @@ import { PhotoUrlContext } from './task-photo'
 import { CalendarScreen } from './calendar-screen'
 import { TaskPage } from './task-page'
 import { validDay } from './lib/calendar'
+import { ArchiveScreen } from './archive-screen'
+import { SettingsScreen } from './settings-screen'
 
 function Login({ pb }: { pb: PocketBase }) {
   const [error, setError] = useState('')
@@ -167,10 +169,6 @@ export function App({ store, pb }: { store: Store; pb: PocketBase }) {
   const detail = /^\/gorev\/([a-z0-9]{8,32})$/.exec(route)
   const edit = /^\/gorev\/([a-z0-9]{8,32})\/duzenle$/.exec(route)
   const form = route === '/yeni' || Boolean(edit)
-  const names: Record<string, string> = {
-    '/arsiv': 'Arşiv',
-    '/ayarlar': 'Ayarlar',
-  }
   return (
     <StorageBoundary>
       <PhotoUrlContext value={photoUrl}>
@@ -237,17 +235,23 @@ export function App({ store, pb }: { store: Store; pb: PocketBase }) {
               <TasksScreen store={store} onOpen={(id) => navigate(`/gorev/${id}`)} />
             ) : route === '/takvim' ? (
               <CalendarScreen store={store} query={query} onNavigate={navigate} />
+            ) : route === '/arsiv' ? (
+              <ArchiveScreen store={store} />
+            ) : route === '/ayarlar' ? (
+              <SettingsScreen
+                store={store}
+                email={String(pb.authStore.record?.email ?? '')}
+                loadPhoto={async (task) => downloadPhoto(await photoUrl(task, true))}
+                onLogout={() => pb.authStore.clear()}
+                onBack={back}
+              />
             ) : (
               <section>
                 <header className="page-header">
-                  <h1>{names[route] ?? 'Sayfa bulunamadı'}</h1>
+                  <h1>Sayfa bulunamadı</h1>
                 </header>
                 <div className="empty-state">
-                  <p>
-                    {names[route]
-                      ? 'Bu ekran sonraki aşamada eklenecek.'
-                      : 'Bu adres artık kullanılmıyor.'}
-                  </p>
+                  <p>Bu adres artık kullanılmıyor.</p>
                   <a className="secondary-button" href="#/">
                     Görevlere dön
                   </a>

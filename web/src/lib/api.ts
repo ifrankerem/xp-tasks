@@ -103,3 +103,10 @@ export function createPhotoUrl(pb: PocketBase) {
       { token: await token, ...(large ? {} : { thumb: '240x240' }) })
   }
 }
+
+/** Download the original protected photo for a complete portable backup. */
+export async function downloadPhoto(url: string): Promise<Blob> {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error('Fotoğraf indirilemedi. Bağlantını kontrol edip yeniden dene.')
+  return response.blob()
+}

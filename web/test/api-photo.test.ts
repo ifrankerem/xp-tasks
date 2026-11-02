@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest'
 import PocketBase from 'pocketbase'
-import { createPhotoUrl } from '../src/lib/api'
+import { createPhotoUrl, downloadPhoto } from '../src/lib/api'
 
 it('uses protected file tokens, reuses them briefly and requests the configured thumbnail', async () => {
   const pb = new PocketBase('https://example.test')
@@ -31,4 +31,16 @@ it('retries token acquisition after a network failure', async () => {
   await expect(url(task, false)).rejects.toThrow('offline')
   await expect(url(task, false)).resolves.toContain('token=reconnected')
   expect(token).toHaveBeenCalledTimes(2)
+})
+
+it('downloads original photo bytes and rejects failed HTTP responses', async () => {
+  const fetch = vi
+    .spyOn(globalThis, 'fetch')
+    .mockResolvedValueOnce(new Response(new Blob(['photo'], { type: 'image/jpeg' })))
+    .mockResolvedValueOnce(new Response('denied', { status: 403 }))
+  expect(await (await downloadPhoto('https://example.test/protected')).text()).toBe('photo')
+  expect(fetch).toHaveBeenCalledWith('https://example.test/protected')
+  await expect(downloadPhoto('https://example.test/protected')).rejects.toThrow(
+    'Fotoğraf indirilemedi',
+  )
 })
