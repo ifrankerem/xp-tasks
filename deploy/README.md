@@ -70,6 +70,35 @@ All commands run on devbox.
 
    If the realtime check prints nothing until the 5 second timeout, something is buffering the event stream. Check `proxy_buffering off` in nginx.
 
+## Migration from v1 (one-off)
+
+`deploy/migrate/migrate.mjs` copies the tasks from a v1 JSON backup (old app → Settings → export) into PocketBase. It changes nothing in Firebase.
+
+- **Dry run by default.** It prints counts, skipped rows and warnings, and writes nothing until you pass `--apply`.
+- **Idempotent.** Tasks keep their v1 ids and ids already on the server are skipped, so running it again never duplicates.
+- **Mapping:**
+  - `completed` becomes Arşiv "Tamamlandı", dated by its last edit.
+  - `detail` becomes `note`, and `dueDate` becomes `date`.
+  - `repeatRule`, or the legacy `repeats` string, becomes `repeat`.
+  - Data-URL photos become file uploads.
+  - The order of the export becomes the manual order. Tasks already in v2 stay on top.
+- **Titles over 500 characters:** the first line stays as the title, and the whole text moves into the note.
+
+Run on devbox:
+
+```sh
+cd /srv/projects/xp-tasks
+node deploy/migrate/migrate.mjs ~/inbox/task-manager-backup-2026-11-03.json      # checks the file only
+read -r PB_EMAIL; read -rs PB_PASSWORD; export PB_EMAIL PB_PASSWORD             # the app account, not the superuser
+node deploy/migrate/migrate.mjs ~/inbox/task-manager-backup-2026-11-03.json      # dry run against the server
+node deploy/migrate/migrate.mjs ~/inbox/task-manager-backup-2026-11-03.json --apply
+unset PB_EMAIL PB_PASSWORD
+```
+
+The last line of `--apply` must be `all backup tasks are on the server.` Otherwise it lists the missing ids and exits with 1. Re-run it after fixing the cause.
+
+Tests: `node --test deploy/migrate/map.test.mjs`.
+
 ## Backups
 
 - restic already covers `/srv/xp/pb_data`.
