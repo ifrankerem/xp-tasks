@@ -14,6 +14,11 @@ import './index.css'
 // The Android WebView's origin is https://localhost, so the app names the server.
 const server = Capacitor.isNativePlatform() ? 'https://task.irfankerem.com' : location.origin
 
+// Installable web app (PWA). The Android app ships its files itself.
+if (import.meta.env.PROD && !Capacitor.isNativePlatform() && 'serviceWorker' in navigator) {
+  void navigator.serviceWorker.register('/sw.js')
+}
+
 createRoot(document.getElementById('root')!).render(
   <App store={new Store()} pb={new PocketBase(server)} />,
 )
