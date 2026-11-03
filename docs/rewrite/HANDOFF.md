@@ -12,7 +12,8 @@ For whoever continues this work in a new session. Read [PLAN.md](PLAN.md) and [B
 | 4. Takvim + task page | PR #36 open into `v2` (issue #35) |
 | 5. Arşiv + Ayarlar | Implemented on `v2-phase5-archive-settings`; PR into `v2` for review (issue #37), depends on #36 |
 | 6. Native alarm module | PR into `v2-phase5-archive-settings` (stacked on #38) |
-| 7–8. Migration, cutover | Not started |
+| 7. Migration | PR into `v2` (`deploy/migrate/`) |
+| 8. Cutover | Not started |
 
 ## How the work is done
 
