@@ -1,4 +1,4 @@
-// node --test deploy/migrate/
+// node --test deploy/migrate/map.test.mjs
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { mapBackup, normalizeRule } from './map.mjs'

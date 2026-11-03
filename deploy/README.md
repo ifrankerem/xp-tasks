@@ -97,7 +97,7 @@ unset PB_EMAIL PB_PASSWORD
 
 The last line of `--apply` must be `all backup tasks are on the server.` Otherwise it lists the missing ids and exits with 1. Re-run it after fixing the cause.
 
-Tests: `node --test deploy/migrate/`.
+Tests: `node --test deploy/migrate/map.test.mjs`.
 
 ## Backups
 
