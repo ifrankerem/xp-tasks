@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import type { Store } from './lib/store'
 import type { Task } from './lib/task'
@@ -27,6 +27,7 @@ export function TaskPhoto({
   const getPhotoUrl = useContext(PhotoUrlContext)
   const [remote, setRemote] = useState('')
   const [failed, setFailed] = useState(false)
+  const viewer = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     if (!blob) {
       setLocal('')
@@ -73,12 +74,18 @@ export function TaskPhoto({
         ▧
       </span>
     )
-  return src ? (
-    <img
-      className={large ? 'photo-preview' : 'task-photo'}
-      src={src}
-      alt="Görev fotoğrafı"
-      onError={() => setFailed(true)}
-    />
-  ) : null
+  if (!src) return null
+  if (!large)
+    return <img className="task-photo" src={src} alt="Görev fotoğrafı" onError={() => setFailed(true)} />
+  // Tap to see it whole; a tap anywhere (or Escape) closes it.
+  return (
+    <>
+      <button type="button" className="photo-open" aria-label="Fotoğrafı büyüt" onClick={() => viewer.current?.showModal()}>
+        <img className="photo-preview" src={src} alt="Görev fotoğrafı" onError={() => setFailed(true)} />
+      </button>
+      <dialog ref={viewer} className="photo-viewer" aria-label="Fotoğraf" onClick={() => viewer.current?.close()}>
+        <img src={src} alt="Görev fotoğrafı, tam boy" />
+      </dialog>
+    </>
+  )
 }
