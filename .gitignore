@@ -52,3 +52,7 @@ worker/.dev.vars
 worker/.vapid.json
 service-account*.json
 *-firebase-adminsdk-*.json
+
+# Signing keys never enter the repo
+*.keystore
+*.jks

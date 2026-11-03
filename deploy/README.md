@@ -70,6 +70,20 @@ All commands run on devbox.
 
    If the realtime check prints nothing until the 5 second timeout, something is buffering the event stream. Check `proxy_buffering off` in nginx.
 
+## v2 web at task.irfankerem.com
+
+Until the cutover, v2 runs on its own hostname next to the old site. The Android app talks to this hostname.
+
+- **Cloudflare:** the tunnel has a `task.irfankerem.com` → `http://localhost:8080` public hostname, plus its DNS CNAME.
+- **nginx:** `deploy/nginx/task.conf`. It has the same `/api/` proxy and the same `/_/` and superuser blocks as `xp.conf`.
+- **Files:** `/srv/sites/task`, written by `cd web && npm run deploy`.
+
+```sh
+sudo mkdir -p /srv/sites/task && sudo chown agent:dev /srv/sites/task
+cp /srv/projects/xp-tasks/deploy/nginx/task.conf /srv/edge/conf.d/task.conf
+cd /srv/edge && docker compose exec nginx nginx -t && docker compose exec nginx nginx -s reload
+```
+
 ## Migration from v1 (one-off)
 
 `deploy/migrate/migrate.mjs` copies the tasks from a v1 JSON backup (old app → Settings → export) into PocketBase. It changes nothing in Firebase.

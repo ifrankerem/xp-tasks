@@ -12,7 +12,7 @@ import '@fontsource/inter/latin-700.css'
 import './index.css'
 
 // The Android WebView's origin is https://localhost, so the app names the server.
-const server = Capacitor.isNativePlatform() ? 'https://xp.irfankerem.com' : location.origin
+const server = Capacitor.isNativePlatform() ? 'https://task.irfankerem.com' : location.origin
 
 createRoot(document.getElementById('root')!).render(
   <App store={new Store()} pb={new PocketBase(server)} />,
