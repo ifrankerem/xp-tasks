@@ -1,0 +1,244 @@
+{
+  "zone": "Europe/Istanbul",
+  "alarms": [
+    {
+      "name": "one off before ring",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2026-11-14",
+        "alarm": "18:30",
+        "repeat": null,
+        "doneOn": null
+      },
+      "now": "2026-11-14T18:29:00+03:00",
+      "next": "2026-11-14T18:30:00+03:00"
+    },
+    {
+      "name": "one off spent at ring",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2026-11-14",
+        "alarm": "18:30",
+        "repeat": null,
+        "doneOn": null
+      },
+      "now": "2026-11-14T18:30:00+03:00",
+      "next": null
+    },
+    {
+      "name": "undated anchor",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": null,
+        "alarm": "18:30",
+        "repeat": null,
+        "doneOn": null
+      },
+      "now": "2026-11-02T10:00:00+03:00",
+      "next": "2026-11-02T18:30:00+03:00"
+    },
+    {
+      "name": "daily every two",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2026-11-02",
+        "alarm": "10:00",
+        "repeat": {
+          "kind": "daily",
+          "interval": 2
+        },
+        "doneOn": null
+      },
+      "now": "2026-11-03T09:00:00+03:00",
+      "next": "2026-11-04T10:00:00+03:00"
+    },
+    {
+      "name": "daily after ring",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2026-11-02",
+        "alarm": "10:00",
+        "repeat": {
+          "kind": "daily",
+          "interval": 2
+        },
+        "doneOn": null
+      },
+      "now": "2026-11-04T10:00:00+03:00",
+      "next": "2026-11-06T10:00:00+03:00"
+    },
+    {
+      "name": "weekly Monday boundary",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2026-11-04",
+        "alarm": "10:00",
+        "repeat": {
+          "kind": "weekly",
+          "days": [
+            0,
+            1
+          ],
+          "interval": 2
+        },
+        "doneOn": null
+      },
+      "now": "2026-11-09T09:00:00+03:00",
+      "next": "2026-11-16T10:00:00+03:00"
+    },
+    {
+      "name": "weekly long interval",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2026-01-07",
+        "alarm": "10:00",
+        "repeat": {
+          "kind": "weekly",
+          "days": [
+            3
+          ],
+          "interval": 52
+        },
+        "doneOn": null
+      },
+      "now": "2026-01-08T09:00:00+03:00",
+      "next": "2027-01-06T10:00:00+03:00"
+    },
+    {
+      "name": "monthly short month",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2026-01-31",
+        "alarm": "10:00",
+        "repeat": {
+          "kind": "monthly",
+          "dayOfMonth": 31
+        },
+        "doneOn": null
+      },
+      "now": "2026-02-01T09:00:00+03:00",
+      "next": "2026-02-28T10:00:00+03:00"
+    },
+    {
+      "name": "monthly leap year",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2028-01-31",
+        "alarm": "10:00",
+        "repeat": {
+          "kind": "monthly",
+          "dayOfMonth": 31
+        },
+        "doneOn": null
+      },
+      "now": "2028-02-01T09:00:00+03:00",
+      "next": "2028-02-29T10:00:00+03:00"
+    },
+    {
+      "name": "future completed occurrence",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2026-11-02",
+        "alarm": "10:00",
+        "repeat": {
+          "kind": "daily",
+          "interval": 1
+        },
+        "doneOn": "2026-12-14"
+      },
+      "now": "2026-11-03T09:00:00+03:00",
+      "next": "2026-12-15T10:00:00+03:00"
+    },
+    {
+      "name": "no alarm",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2026-11-14",
+        "alarm": null,
+        "repeat": null,
+        "doneOn": null
+      },
+      "now": "2026-11-03T09:00:00+03:00",
+      "next": null
+    },
+    {
+      "name": "archived",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "archived",
+        "createdAt": 1793577600000,
+        "date": "2026-11-14",
+        "alarm": "10:00",
+        "repeat": null,
+        "doneOn": null
+      },
+      "now": "2026-11-03T09:00:00+03:00",
+      "next": null
+    },
+    {
+      "name": "before anchor",
+      "task": {
+        "id": "vector000000001",
+        "title": "Vektör",
+        "note": "",
+        "status": "open",
+        "createdAt": 1793577600000,
+        "date": "2026-12-01",
+        "alarm": "10:00",
+        "repeat": {
+          "kind": "daily",
+          "interval": 3
+        },
+        "doneOn": null
+      },
+      "now": "2026-11-03T09:00:00+03:00",
+      "next": "2026-12-01T10:00:00+03:00"
+    }
+  ]
+}

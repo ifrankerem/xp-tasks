@@ -90,10 +90,11 @@ export function nextAlarm(task: Task, now: Date): number | null {
   }
 
   const anchor = anchorOf(task)
-  let day = nextOccurrence(task.repeat, anchor, today(now))
-  // At most a done occurrence and today's passed one stand in the way.
-  for (let i = 0; day && i < 3; i++) {
-    if ((!task.doneOn || day > task.doneOn) && ringAt(day) > now.getTime()) return ringAt(day)
+  const from = task.doneOn && task.doneOn >= today(now) ? addDays(task.doneOn, 1) : today(now)
+  let day = nextOccurrence(task.repeat, anchor, from)
+  // Completed dates are skipped up front; only today's passed time can remain.
+  for (let i = 0; day && i < 2; i++) {
+    if (ringAt(day) > now.getTime()) return ringAt(day)
     day = nextOccurrence(task.repeat, anchor, addDays(day, 1))
   }
   return null

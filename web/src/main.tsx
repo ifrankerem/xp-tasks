@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import { createRoot } from 'react-dom/client'
 import PocketBase from 'pocketbase'
 import { App } from './app'
@@ -10,6 +11,9 @@ import '@fontsource/inter/latin-600.css'
 import '@fontsource/inter/latin-700.css'
 import './index.css'
 
+// The Android WebView's origin is https://localhost, so the app names the server.
+const server = Capacitor.isNativePlatform() ? 'https://xp.irfankerem.com' : location.origin
+
 createRoot(document.getElementById('root')!).render(
-  <App store={new Store()} pb={new PocketBase(location.origin)} />,
+  <App store={new Store()} pb={new PocketBase(server)} />,
 )
